@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  web:
+    restart: always
+    build: .
+    expose:
+      - "8001"
+    # Connects you to your databases
+    links:
+      - redis:redis
+    # Where we will store the data.
+    volumes:
+      - /opt/status-page/statuspage:/usr/src/app
+      - /opt/status-page/statuspage/static:/usr/src/app/static
+    env_file: ./vars.py
+    command: /usr/local/bin/gunicorn statuspage.wsgi:application -w 2 -b :8001
+
+      #  nginx:
+      #restart: always
+      #build:
+     # context: /opt/status-page/statuspage/nginx/
+     #ports:
+     #- "80:80"
+     #volumes:
+     #- /opt/status-page/statuspage/static:/usr/src/app/static
+     #volumes_from:
+     #- web
+     # links:
+     #- web:web
+
+  redis:
+    restart: always
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+volumes:
+  redisdata:
+
